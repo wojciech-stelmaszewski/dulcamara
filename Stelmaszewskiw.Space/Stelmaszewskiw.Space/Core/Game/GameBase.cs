@@ -27,7 +27,7 @@ namespace Stelmaszewskiw.Space.Core.Game
         protected override void Update(GameTime gameTime)
         {
             //TODO Ordering.
-            foreach (var gameComponent in _gameComponents.OfType<IUpdateable>())
+            foreach (var gameComponent in _gameComponents.OfType<SharpDX.Toolkit.IUpdateable>())
             {
                 if (gameComponent.Enabled)
                 {
@@ -41,7 +41,7 @@ namespace Stelmaszewskiw.Space.Core.Game
         protected override void Draw(GameTime gameTime)
         {
             //TODO Ordering.
-            foreach (var gameComponent in _gameComponents.OfType<IDrawable>())
+            foreach (var gameComponent in _gameComponents.OfType<SharpDX.Toolkit.IDrawable>())
             {
                 if (gameComponent.Visible)
                 {

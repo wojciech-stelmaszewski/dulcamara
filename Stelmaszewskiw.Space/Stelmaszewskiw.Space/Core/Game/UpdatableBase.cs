@@ -3,7 +3,7 @@ using SharpDX.Toolkit;
 
 namespace Stelmaszewskiw.Space.Core.Game
 {
-    public abstract class UpdateableGameComponentBase : GameComponentBase, IUpdateable
+    public abstract class UpdateableGameComponentBase : GameComponentBase, SharpDX.Toolkit.IUpdateable
     {
         private bool _enabled;
         private int _updateOrder;

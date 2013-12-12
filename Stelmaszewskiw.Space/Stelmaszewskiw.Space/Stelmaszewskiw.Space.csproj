@@ -38,7 +38,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
-    <UseVSHostingProcess>true</UseVSHostingProcess>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -118,6 +118,8 @@
     <Compile Include="Core\Game\GameComponentBase.cs" />
     <Compile Include="Core\Game\IGame.cs" />
     <Compile Include="Core\Game\IGameComponent.cs" />
+    <Compile Include="Core\Game\IDrawable.cs" />
+    <Compile Include="Core\Game\IUpdateable.cs" />
     <Compile Include="Core\Game\UpdatableBase.cs" />
     <Compile Include="Core\Interfaces\IHaveOrientation.cs" />
     <Compile Include="Core\Interfaces\IHavePosition.cs" />

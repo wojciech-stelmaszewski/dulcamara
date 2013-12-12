@@ -22,11 +22,11 @@ namespace Stelmaszewskiw.Space.Cameras
 
         private Vector3 _up = Vector3.UnitY;
         private Vector3 _forward = Vector3.UnitZ;
-        private Vector3 _left = -Vector3.UnitX;
+        private Vector3 _left = Vector3.UnitX;
 
         public Camera(IGame game) : base(game)
         {
-            ProjectionMatrix = Matrix.PerspectiveFovLH(MathUtil.PiOverFour,
+            ProjectionMatrix = Matrix.PerspectiveFovRH(MathUtil.PiOverFour,
                                                        (float) Game.GraphicsDevice.BackBuffer.Width/
                                                        Game.GraphicsDevice.BackBuffer.Height, 0.1f, 100.0f);
 
