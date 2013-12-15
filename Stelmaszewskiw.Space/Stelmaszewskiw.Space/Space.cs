@@ -2,9 +2,11 @@
 using SharpDX;
 using SharpDX.Toolkit;
 using SharpDX.Toolkit.Graphics;
+using SharpDX.Toolkit.Input;
 using Stelmaszewskiw.Space.Cameras;
 using Stelmaszewskiw.Space.Core.Game;
 using Stelmaszewskiw.Space.Input;
+using KeyboardManager = Stelmaszewskiw.Space.Input.KeyboardManager;
 
 namespace Stelmaszewskiw.Space
 {
@@ -17,10 +19,17 @@ namespace Stelmaszewskiw.Space
         private PrimitiveBatch<VertexPositionColor> _batch;
         private VertexPositionColor[] _vertexPositionColorList;
         private BasicEffect _primitiveEffect;
+        private SpriteBatch _captionContainer;
+        private SpriteFont _arial16Font;
+
+        private Grid _grid;
+        private MouseManager _mouseManager;
 
         public Space()
         {
             _graphicDeviceManager = new GraphicsDeviceManager(this);
+
+            Content.RootDirectory = "Content";
         }
 
         protected override void Initialize()
@@ -40,11 +49,16 @@ namespace Stelmaszewskiw.Space
             RegisterGameComponents(keyboardManager);
 
             var camera = new Camera(this);
-            camera.Position = 2*Vector3.UnitZ;
+            camera.Position = new Vector3(4, 4, 14);
             RegisterGameComponents(camera);
             _cameraManager.RegisterCamera(camera);
 
             _graphicDeviceManager.PreferMultiSampling = true;
+
+            _grid = new Grid(this);
+
+            _mouseManager = new MouseManager(this);
+            _mouseManager.Initialize();
 
             base.Initialize();
         }
@@ -62,6 +76,9 @@ namespace Stelmaszewskiw.Space
             _torus = ToDisposeContent(GeometricPrimitive.Torus.New(GraphicsDevice, 20.0f, 5.0f, 128));
             //_torus = ToDisposeContent(GeometricPrimitive.Cube.New(GraphicsDevice));
 
+            _captionContainer = ToDisposeContent(new SpriteBatch(GraphicsDevice));
+            //_arial16Font = Content.Load<SpriteFont>("Arial16");
+
             _batch = new PrimitiveBatch<VertexPositionColor>(GraphicsDevice);
             _vertexPositionColorList = new VertexPositionColor[6];
             _vertexPositionColorList[0] = new VertexPositionColor(Vector3.Zero, Color.Crimson);
@@ -74,6 +91,8 @@ namespace Stelmaszewskiw.Space
             base.LoadContent();
         }
 
+        
+
         protected override void Update(GameTime gameTime)
         {
             _basicEffect.View = _cameraManager.GetCurrentCamera().ViewMatrix;
@@ -82,18 +101,39 @@ namespace Stelmaszewskiw.Space
             _primitiveEffect.View = _cameraManager.GetCurrentCamera().ViewMatrix;
             _primitiveEffect.Projection = _cameraManager.GetCurrentCamera().ProjectionMatrix;
 
+            var currentMouseState = _mouseManager.GetState();
+
+            var currentCamera = _cameraManager.GetCurrentCamera();
+            var projectionCamera = currentCamera as IProjectionCamera;
+            if(projectionCamera != null)
+            {
+                var result = ScreenCoordinatesToProjectedPlaneCoordinatesCalculator.CalculateIntersectionPoint(
+                    new Vector2(currentMouseState.X, currentMouseState.Y),
+                    projectionCamera);
+
+                //System.Console.WriteLine(new Vector2(currentMouseState.X, currentMouseState.Y));
+                System.Console.WriteLine(result);
+            }
+
             base.Update(gameTime);
         }
 
         protected override void Draw(GameTime gameTime)
         {
-            GraphicsDevice.Clear(Color.CornflowerBlue);
+            GraphicsDevice.Clear(new Color(30, 30, 30));
 
-            _torus.Draw(_basicEffect);
+            //_torus.Draw(_basicEffect);
+
+            //_captionContainer.Begin();
+            //_captionContainer.DrawString(_arial16Font, "Alice has a cat.", new Vector2(30, 30), Color.WhiteSmoke);
+            //_captionContainer.End();
 
             foreach (var pass in _primitiveEffect.CurrentTechnique.Passes)
             {
                 pass.Apply();
+                
+                _grid.Draw(gameTime);
+                
                 _batch.Begin();
                 //_batch.DrawLine(new VertexPositionColor(Vector3.Zero, Color.Crimson), new VertexPositionColor(Vector3.UnitX, Color.Crimson));
                 _batch.Draw(PrimitiveType.LineList, _vertexPositionColorList);

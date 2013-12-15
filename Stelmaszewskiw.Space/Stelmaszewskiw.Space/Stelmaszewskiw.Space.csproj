@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{4DB29C78-15B9-462C-9A12-FEA86FCBF6A9}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Stelmaszewskiw.Space</RootNamespace>
     <AssemblyName>Stelmaszewskiw.Space</AssemblyName>
@@ -114,6 +114,7 @@
     <Compile Include="Cameras\CameraManager.cs" />
     <Compile Include="Cameras\ICamera.cs" />
     <Compile Include="Cameras\ICameraManager.cs" />
+    <Compile Include="Cameras\IProjectionCamera.cs" />
     <Compile Include="Core\Game\GameBase.cs" />
     <Compile Include="Core\Game\GameComponentBase.cs" />
     <Compile Include="Core\Game\IGame.cs" />
@@ -123,11 +124,16 @@
     <Compile Include="Core\Game\UpdatableBase.cs" />
     <Compile Include="Core\Interfaces\IHaveOrientation.cs" />
     <Compile Include="Core\Interfaces\IHavePosition.cs" />
+    <Compile Include="Extensions\VectorExtensions.cs" />
+    <Compile Include="Grid.cs" />
+    <Compile Include="ScreenCoordinatesToProjectedPlaneCoordinatesCalculator.cs" />
     <Compile Include="Input\IKeyboardManager.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Space.cs" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Content\Arial16.xml" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="$(SolutionDir)\.nuget\NuGet.targets" Condition="Exists('$(SolutionDir)\.nuget\NuGet.targets')" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
