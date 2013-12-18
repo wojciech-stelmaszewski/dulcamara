@@ -8,6 +8,10 @@ namespace Stelmaszewskiw.Space.Cameras
     {
         Matrix ProjectionMatrix { get; }
 
+        Matrix InvertedProjectionMatrix { get; }
+
         Matrix ViewMatrix { get; }
+
+        Matrix InvertedViewMatrix { get; }
     }
 }

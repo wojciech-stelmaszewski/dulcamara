@@ -1,4 +1,6 @@
-﻿using Ninject;
+﻿using System.Collections.Generic;
+using System.Linq;
+using Ninject;
 using SharpDX;
 using SharpDX.Toolkit;
 using SharpDX.Toolkit.Graphics;
@@ -18,12 +20,17 @@ namespace Stelmaszewskiw.Space
         private ICameraManager _cameraManager;
         private PrimitiveBatch<VertexPositionColor> _batch;
         private VertexPositionColor[] _vertexPositionColorList;
+
+        private IList<VertexPositionColor> _innerCellSquare;
+
         private BasicEffect _primitiveEffect;
         private SpriteBatch _captionContainer;
         private SpriteFont _arial16Font;
 
         private Grid _grid;
         private MouseManager _mouseManager;
+        private Vector3 _intersectionData;
+        private IKeyboardManager _keyboardManager;
 
         public Space()
         {
@@ -45,8 +52,8 @@ namespace Stelmaszewskiw.Space
                   .To<KeyboardManager>()
                   .InSingletonScope()
                   .WithConstructorArgument("game", this);
-            var keyboardManager = Kernel.Get<IKeyboardManager>();
-            RegisterGameComponents(keyboardManager);
+            _keyboardManager = Kernel.Get<IKeyboardManager>();
+            RegisterGameComponents(_keyboardManager);
 
             var camera = new Camera(this);
             camera.Position = new Vector3(4, 4, 14);
@@ -59,6 +66,8 @@ namespace Stelmaszewskiw.Space
 
             _mouseManager = new MouseManager(this);
             _mouseManager.Initialize();
+
+            _innerCellSquare = new List<VertexPositionColor>();
 
             base.Initialize();
         }
@@ -107,12 +116,24 @@ namespace Stelmaszewskiw.Space
             var projectionCamera = currentCamera as IProjectionCamera;
             if(projectionCamera != null)
             {
-                var result = ScreenCoordinatesToProjectedPlaneCoordinatesCalculator.CalculateIntersectionPoint(
+                _intersectionData = ScreenCoordinatesToProjectedPlaneCoordinatesCalculator.CalculateIntersectionPoint(
                     new Vector2(currentMouseState.X, currentMouseState.Y),
                     projectionCamera);
 
-                //System.Console.WriteLine(new Vector2(currentMouseState.X, currentMouseState.Y));
-                System.Console.WriteLine(result);
+                _innerCellSquare.Clear();
+
+                var innerCellIndices = _grid.GetCellIndex(_intersectionData.X, _intersectionData.Z);
+
+                if(_intersectionData != Vector3.Zero && innerCellIndices.X >= 0 && innerCellIndices.X < _grid.CellsCountX && innerCellIndices.Y >= 0 && innerCellIndices.Y < _grid.CellsCountY)
+                {
+                    var innerCellVertices = _grid.GetInnerCellVertices((int)innerCellIndices.X, (int)innerCellIndices.Y, 0.05f).ToArray();
+
+                    for (var i = 0; i < innerCellVertices.Length; i++)
+                    {
+                        _innerCellSquare.Add(new VertexPositionColor(new Vector3(innerCellVertices[i].X, 0.0f, innerCellVertices[i].Y), Color.Crimson));
+                        _innerCellSquare.Add(new VertexPositionColor(new Vector3(innerCellVertices[(i + 1) % innerCellVertices.Length].X, 0.0f, innerCellVertices[(i + 1) % innerCellVertices.Length].Y), Color.Crimson));
+                    }    
+                }
             }
 
             base.Update(gameTime);
@@ -135,7 +156,10 @@ namespace Stelmaszewskiw.Space
                 _grid.Draw(gameTime);
                 
                 _batch.Begin();
-                //_batch.DrawLine(new VertexPositionColor(Vector3.Zero, Color.Crimson), new VertexPositionColor(Vector3.UnitX, Color.Crimson));
+                if(_innerCellSquare.Any())
+                {
+                    _batch.Draw(PrimitiveType.LineList, _innerCellSquare.ToArray());
+                }
                 _batch.Draw(PrimitiveType.LineList, _vertexPositionColorList);
                 _batch.End();
             }

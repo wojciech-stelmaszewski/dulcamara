@@ -126,6 +126,7 @@
     <Compile Include="Core\Interfaces\IHavePosition.cs" />
     <Compile Include="Extensions\VectorExtensions.cs" />
     <Compile Include="Grid.cs" />
+    <Compile Include="GridHelper.cs" />
     <Compile Include="ScreenCoordinatesToProjectedPlaneCoordinatesCalculator.cs" />
     <Compile Include="Input\IKeyboardManager.cs" />
     <Compile Include="Program.cs" />

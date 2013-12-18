@@ -1,5 +1,4 @@
-﻿using System;
-using SharpDX;
+﻿using SharpDX;
 using Stelmaszewskiw.Space.Cameras;
 
 namespace Stelmaszewskiw.Space
@@ -11,17 +10,23 @@ namespace Stelmaszewskiw.Space
     {
         public static Vector3 CalculateIntersectionPoint(Vector2 screenCoodrinates, IProjectionCamera camera)
         {
-            var horizontalFov = camera.Fov;
-            var verticalFov = camera.ScreenHeight*horizontalFov/camera.ScreenWidth;
+            //Great article at http://antongerdelan.net/opengl/raycasting.html
 
-            var horizontalAngle = Math.Atan((-(camera.ScreenWidth*(screenCoodrinates.X - 1.0f/2.0f)))*Math.Tan(horizontalFov/2.0f)/camera.ScreenWidth);
-            var verticalAngle = Math.Atan(-(camera.ScreenWidth*(screenCoodrinates.Y - 1.0f/2.0f))*Math.Tan(verticalFov/2.0f)/camera.ScreenHeight);
+            var x = 2.0f*(screenCoodrinates.X - 0.5f);
+            var y = -2.0f*(screenCoodrinates.Y - 0.5f);
 
-            var directionVector = camera.Forward + (float)Math.Tan(horizontalAngle) * camera.Left + (float)Math.Tan(verticalAngle) * camera.Up;
+            var clippedRay = new Vector4(x, y, -1.0f, 1.0f);
 
-            var t = -camera.Position.Y/directionVector.Y;
+            var rayEye = Vector4.Transform(clippedRay, camera.InvertedProjectionMatrix);
+            rayEye = new Vector4(rayEye.X, rayEye.Y, -1.0f, 0.0f);
 
-            return camera.Position + directionVector*t;
+            var ray = Vector4.Transform(rayEye, camera.InvertedViewMatrix);
+
+            var resultRay = new Vector3(ray.X, ray.Y, ray.Z);
+
+            var t = -(camera.Position.Y) / resultRay.Y;
+
+            return t > 0 ? camera.Position + resultRay*t : Vector3.Zero;
         }
     }
 }
