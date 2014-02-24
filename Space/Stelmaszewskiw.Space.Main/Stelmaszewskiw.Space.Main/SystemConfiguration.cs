@@ -18,5 +18,25 @@
         public int Height { get; set; }
 
         public bool WaitVerticalBlanking { get; set; }
+
+        /// <summary>
+        /// Full screen mode indicator.
+        /// </summary>
+        public bool FullScreen { get; set; }
+
+        /// <summary>
+        /// Screen refresh sync with buffer swaping rate indicator.
+        /// </summary>
+        public bool VerticalSyncEnabled { get; set; }
+
+        /// <summary>
+        /// Far plane distance.
+        /// </summary>
+        public float ScreenDepth { get; set; }
+
+        /// <summary>
+        /// Near plane distance.
+        /// </summary>
+        public float ScreenNear { get; set; }
     }
 }

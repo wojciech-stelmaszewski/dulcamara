@@ -7,5 +7,13 @@
         public const int Height = 600;
 
         public const string Title = "Space";
+
+        public const bool FullScreen = false;
+
+        public const bool VerticalSyncEnabled = true;
+
+        public const float ScreenDepth = 1000.0f;
+
+        public const float ScreenNear = 0.1f;
     }
 }

@@ -27,6 +27,10 @@ namespace Stelmaszewskiw.Space.Main
                                               Width = SystemConfigurationDefaults.Width,
                                               Height = SystemConfigurationDefaults.Height,
                                               WaitVerticalBlanking = false,
+                                              FullScreen = SystemConfigurationDefaults.FullScreen,
+                                              VerticalSyncEnabled = SystemConfigurationDefaults.VerticalSyncEnabled,
+                                              ScreenDepth = SystemConfigurationDefaults.ScreenDepth,
+                                              ScreenNear = SystemConfigurationDefaults.ScreenNear
                                           };
             }
 
