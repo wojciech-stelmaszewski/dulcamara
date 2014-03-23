@@ -4,7 +4,7 @@ using System.Windows.Forms;
 
 namespace Stelmaszewskiw.Space.Main
 {
-    public class InputManager : ICloneable
+    public class InputManager : IDisposable, ICloneable
     {
         private readonly Dictionary<Keys, bool> inputKeys = new Dictionary<Keys, bool>();
 
@@ -34,6 +34,10 @@ namespace Stelmaszewskiw.Space.Main
         public void KeyUp(Keys key)
         {
             inputKeys[key] = false;
+        }
+
+        public void Dispose()
+        {
         }
 
         public object Clone()

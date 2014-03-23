@@ -7,21 +7,20 @@ namespace Stelmaszewskiw.Space.Main
         [STAThread]
         static void Main(string[] args)
         {
-            var result = false;
-
-            var system = new System();
-
-            try
+            using(var system = new System())
             {
-                result = system.Initialize();
-                if(result)
+                try
                 {
-                    system.Run();
+                    var result = system.Initialize();
+                    if (result)
+                    {
+                        system.Run();
+                    }
                 }
-            }
-            finally 
-            {
-                system.Shutdown();
+                finally
+                {
+                    
+                }
             }
         }
     }

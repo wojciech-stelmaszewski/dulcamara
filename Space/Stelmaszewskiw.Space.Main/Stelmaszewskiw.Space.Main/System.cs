@@ -5,7 +5,7 @@ using SharpDX.Windows;
 
 namespace Stelmaszewskiw.Space.Main
 {
-    public class System : ICloneable
+    public class System : IDisposable, ICloneable
     {
         private bool isFormResizing;
         private bool isFormClosed;
@@ -118,22 +118,6 @@ namespace Stelmaszewskiw.Space.Main
             HandleResize(sender, e);
         }
 
-        public void Shutdown()
-        {
-            if(GraphicsManager != null)
-            {
-                GraphicsManager.Shutdown();
-                GraphicsManager = null;
-            }
-
-            if(InputManager != null)
-            {
-                InputManager = null;
-            }
-
-            ShotdownWindow();
-        }
-
         private void RenderCallback()
         {
             if(isFormClosed)
@@ -182,7 +166,24 @@ namespace Stelmaszewskiw.Space.Main
             return GraphicsManager.Frame();
         }
 
-        private void ShotdownWindow()
+        private void Shutdown()
+        {
+            if(GraphicsManager != null)
+            {
+                GraphicsManager.Dispose();
+                GraphicsManager = null;
+            }
+
+            if(InputManager != null)
+            {
+                InputManager.Dispose();
+                InputManager = null;
+            }
+
+            ShutdownWindow();
+        }
+
+        private void ShutdownWindow()
         {
             if(MainForm != null)
             {
@@ -190,6 +191,11 @@ namespace Stelmaszewskiw.Space.Main
             }
 
             MainForm = null;
+        }
+
+        public void Dispose()
+        {
+            Shutdown();
         }
 
         public object Clone()
