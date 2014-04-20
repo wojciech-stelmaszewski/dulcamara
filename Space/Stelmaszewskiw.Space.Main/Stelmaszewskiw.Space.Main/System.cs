@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Drawing;
+using System.Reflection;
 using System.Windows.Forms;
+using Ninject;
 using SharpDX.Windows;
 
 namespace Stelmaszewskiw.Space.Main
@@ -19,6 +21,11 @@ namespace Stelmaszewskiw.Space.Main
 
         public bool Initialize()
         {
+            //Initialize IoC container.
+            var kernel = new StandardKernel();
+            kernel.Load(Assembly.GetExecutingAssembly());
+            Container.Kernel = kernel;
+
             if(SystemConfiguration == null)
             {
                 SystemConfiguration = new SystemConfiguration

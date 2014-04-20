@@ -1,10 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows.Forms;
+using NLog;
 using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.DXGI;
@@ -37,14 +34,14 @@ namespace Stelmaszewskiw.Space.Main.Graphics
         private SharpDX.Direct3D11.InputLayout InputLayout { get; set; }
         private SharpDX.Direct3D11.Buffer ConstantMatrixBuffer { get; set; }
 
-        //TODO Can be changed?
+        //The name of vertex shader function name.
         private const string VertexShaderName = "ColorVertexShader";
-        //TODO Can be changed?        
+        //The name of pixel shader function name.
         private const string PixelShaderName = "ColorPixelShader";
 
-        //TODO Why not vs_5_0
+        //My GraphicsDevice do not support vs_5_0. :(
         public const string VertexShaderVersion = "vs_4_0";
-        //TODO Why not ps_5_0
+        //My GraphicsDevice do not support ps_5_0. :(
         public const string PixelShaderVersion = "ps_4_0";
 
         //TODO Should be a parameter. (We should copy shader files to output directory !?).
@@ -52,6 +49,13 @@ namespace Stelmaszewskiw.Space.Main.Graphics
 
         //TODO Should be a parameter. (We should copy shader files to output directory !?).
         private const string PixelShaderFilename = "Shaders/solidColorPixel.hlsl";
+
+        private readonly Logger logger;
+
+        public SolidColorShader()
+        {
+            logger = LogManager.GetCurrentClassLogger();
+        }
 
         private bool SetShaderParameters(SharpDX.Direct3D11.DeviceContext deviceContext, Matrix worldMatrix, Matrix viewMatrix, Matrix projectionMatrix)
         {
@@ -68,7 +72,7 @@ namespace Stelmaszewskiw.Space.Main.Graphics
                                              out mappedResource);
 
                 //Copy the matrices into the constant buffer.
-                var matrixBuffer = new MatrixBuffer()
+                var matrixBuffer = new MatrixBuffer
                                        {
                                            World = worldMatrix,
                                            View = viewMatrix,
@@ -80,7 +84,7 @@ namespace Stelmaszewskiw.Space.Main.Graphics
                 deviceContext.UnmapSubresource(ConstantMatrixBuffer, 0);
 
                 //Set the position of the constant buffer in the vertex shader.
-                var bufferNumber = 0;
+                const int bufferNumber = 0;
 
                 //Finally set the constant buffer in the vertex shader with the uploaded values.
                 deviceContext.VertexShader.SetConstantBuffer(bufferNumber, ConstantMatrixBuffer);
@@ -89,7 +93,7 @@ namespace Stelmaszewskiw.Space.Main.Graphics
             }
             catch (Exception exception)
             {
-                //TODO Log the error.
+                logger.FatalException("Setting shader parameters failed.", exception);
                 return false;
             }
         }
@@ -167,22 +171,24 @@ namespace Stelmaszewskiw.Space.Main.Graphics
         {
             try
             {
+                logger.Debug("Compiling vertex shader from file '{0}'...", vertexShaderFilename);
                 //Compile the vertex shader code.
                 //After compiling and usinging vertex shader code should be release, since it is no longer needed.
                 using (var vertexShaderByteCode = SharpDX.D3DCompiler.ShaderBytecode.CompileFromFile(vertexShaderFilename,
                                                                                               VertexShaderName,
                                                                                               VertexShaderVersion,
-                                                                                              ShaderFlags.None,
+                                                                                              ShaderFlags.EnableStrictness,
                                                                                               EffectFlags.None)
                                                                                               )
                 {
                     //Create the vertex shader from the buffer.
                     VertexShader = new VertexShader(device, vertexShaderByteCode);
 
+                    logger.Debug("Compiling pixel shader from file '{0}'...", vertexShaderFilename);
                     //Compile the pixel shader code.
                     //After compiling and usinging pixel shader code should be release, since it is no longer needed.
                     using (var pixelShaderByteCode = ShaderBytecode.CompileFromFile(pixelShaderFilename, PixelShaderName,
-                                                                             PixelShaderVersion, ShaderFlags.None,
+                                                                             PixelShaderVersion, ShaderFlags.EnableStrictness,
                                                                              EffectFlags.None)
                                                                              )
                     {
@@ -243,6 +249,7 @@ namespace Stelmaszewskiw.Space.Main.Graphics
             catch (Exception exception)
             {
                 MessageBox.Show(String.Format("Error initializing shader. '{0}'", exception));
+                logger.FatalException("Error initializing shader.", exception);
                 return false;
             }
         }
