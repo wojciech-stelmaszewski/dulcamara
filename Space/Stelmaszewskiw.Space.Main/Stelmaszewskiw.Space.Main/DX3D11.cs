@@ -310,6 +310,7 @@ namespace Stelmaszewskiw.Space.Main
             DeviceContext.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Depth, 1, 0);
 
             //Clear the back buffer.
+            //TODO Standarize colors usage.
             var color = new Color4(100.0f/255, 149.0f/255, 237.0f/255, 0.0f); //Temporary CornflowerBlue.
             DeviceContext.ClearRenderTargetView(renderTargetView, color);
         }
