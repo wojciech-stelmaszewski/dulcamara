@@ -1,4 +1,5 @@
 ﻿using System;
+using NLog;
 using SharpDX;
 using SharpDX.DXGI;
 using SharpDX.Direct3D;
@@ -7,7 +8,7 @@ using Stelmaszewskiw.Space.Main.Graphics;
 
 namespace Stelmaszewskiw.Space.Main
 {
-    public class Model : IDisposable
+    public class SimpleModel : IDisposable
     {
         private SharpDX.Direct3D11.Buffer VertexBuffer { get; set; }
         private SharpDX.Direct3D11.Buffer IndexBuffer { get; set; }
@@ -15,10 +16,30 @@ namespace Stelmaszewskiw.Space.Main
         private int VertexCount { get; set; }
         public int IndexCount { get; private set; }
 
-        public bool Initialize(SharpDX.Direct3D11.Device device)
+        public Texture Texture { get; private set; }
+
+        private readonly Logger logger;
+
+        public SimpleModel()
+        {
+            logger = LogManager.GetCurrentClassLogger();
+        }
+
+        public bool Initialize(SharpDX.Direct3D11.Device device, string textureFilename)
         {
             //Initialize the vertex buffer that hold the geometry for the triangle.
-            return InitializeBuffers(device);
+            if(!InitializeBuffers(device))
+            {
+                return false;
+            }
+
+            //Load the texture object.
+            if(!LoadTexture(device, textureFilename))
+            {
+                return false;
+            }
+
+            return true;
         }
 
         public void Render(DeviceContext deviceContext)
@@ -32,6 +53,17 @@ namespace Stelmaszewskiw.Space.Main
             Shutdown();
         }
 
+        private bool LoadTexture(SharpDX.Direct3D11.Device device, string textureFilename)
+        {
+            //Create the texture object.
+            Texture = new Texture();
+
+            //Initialize the texture object.
+            Texture.Initialize(device, textureFilename);
+
+            return true;
+        }
+
         private bool InitializeBuffers(SharpDX.Direct3D11.Device device)
         {
             try
@@ -41,54 +73,36 @@ namespace Stelmaszewskiw.Space.Main
                 //Set number of indices in the index array.
                 IndexCount = 6;
 
-                var firstVertexColor = new SharpDX.Vector4(0.5843137255f, 0.7294117647f, 0.2352941176f, 1.0f);
-                var secondVertexColor = new SharpDX.Vector4(0.9411764706f, 0.5568627451f, 0.4901960784f, 1.0f);
-
                 //Create the vertex array and load it with data.
                 var vertices = new[]
                                    {
                                        ////Bottom left.
-                                       //new SolidColorShader.Vertex
-                                       //    {
-                                       //        Position = new Vector3(-1.0f, -1.0f, 0.0f),
-                                       //        Color = firstVertexColor
-                                       //    },
-                                       ////Top middle.
-                                       //new SolidColorShader.Vertex
-                                       //    {
-                                       //        Position = new Vector3(0.0f, 1.0f, 0.0f),
-                                       //        Color = secondVertexColor                                           
-                                       //    },
-                                       ////Bottom right.
-                                       //new SolidColorShader.Vertex
-                                       //    {
-                                       //        Position = new Vector3(1.0f, -1.0f, 0.0f),
-                                       //        Color = firstVertexColor
-                                       //    }
-
-                                       ////Bottom left.
-                                       new SolidColorShader.Vertex
+                                       new DiffuseColorShader.Vertex
                                            {
                                                Position = new Vector3(-1.0f, -1.0f, 0.0f),
-                                               Color = secondVertexColor
+                                               Texture = new Vector2(0.0f, 1.0f),
+                                               Normal = -Vector3.UnitZ
                                            },
                                        ////Bottom right.
-                                       new SolidColorShader.Vertex
+                                       new DiffuseColorShader.Vertex
                                            {
                                                Position = new Vector3(1.0f, -1.0f, 0.0f),
-                                               Color = firstVertexColor
+                                               Texture = new Vector2(1.0f, 1.0f),
+                                               Normal = -Vector3.UnitZ
                                            },
                                        ////Top right.
-                                       new SolidColorShader.Vertex
+                                       new DiffuseColorShader.Vertex
                                            {
                                                Position = new Vector3(1.0f, 1.0f, 0.0f),
-                                               Color = secondVertexColor
+                                               Texture = new Vector2(1.0f, 0.0f),
+                                               Normal = -Vector3.UnitZ
                                            },
                                        ////Top left.
-                                       new SolidColorShader.Vertex
+                                       new DiffuseColorShader.Vertex
                                            {
                                                Position = new Vector3(-1.0f, 1.0f, 0.0f),
-                                               Color = firstVertexColor
+                                               Texture = new Vector2(0.0f, 0.0f),
+                                               Normal = -Vector3.UnitZ
                                            },
                                        
                                    };
@@ -97,9 +111,6 @@ namespace Stelmaszewskiw.Space.Main
                                   {
                                       0, 2, 1, 
                                       0, 3, 2
-                                      //0, //Bottom left.
-                                      //1, //Top middle.
-                                      //2 //Bottom right.
                                   };
 
                 //Create the vertex buffer.
@@ -110,17 +121,30 @@ namespace Stelmaszewskiw.Space.Main
 
                 return true;
             }
-            catch (Exception)
+            catch (Exception exception)
             {
-                //TODO Log the error.
+                logger.FatalException("Initializing model buffers failed.", exception);
                 return false;
             }
         }
 
         private void Shutdown()
         {
+            //Release the model texture.
+            ReleaseTexture();
+
             //Relese the vertex and index buffers.
             ShutdownBuffers();
+        }
+
+        private void ReleaseTexture()
+        {
+            //Release the texture object.
+            if(Texture != null)
+            {
+                Texture.Dispose();
+                Texture = null;
+            }
         }
 
         private void ShutdownBuffers()
@@ -146,7 +170,7 @@ namespace Stelmaszewskiw.Space.Main
             deviceContext.InputAssembler.SetVertexBuffers(0,
                                                           new VertexBufferBinding(VertexBuffer,
                                                                                   Utilities.SizeOf
-                                                                                      <SolidColorShader.Vertex>(), 0));
+                                                                                      <DiffuseColorShader.Vertex>(), 0));
 
             //Set the index buffer to active in the input assembler so it can be rendered.
             deviceContext.InputAssembler.SetIndexBuffer(IndexBuffer, Format.R32_UInt, 0);
